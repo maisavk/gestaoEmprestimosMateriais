@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GestaoEmprestimos.Application/GestaoEmprestimos.Application.csproj" />
+    <Project Path="src/GestaoEmprestimos.Blazor/GestaoEmprestimos.Blazor.csproj" />
+    <Project Path="src/GestaoEmprestimos.ConsoleApp/GestaoEmprestimos.ConsoleApp.csproj" />
+    <Project Path="src/GestaoEmprestimos.Domain/GestaoEmprestimos.Domain.csproj" />
+    <Project Path="src/GestaoEmprestimos.Infrastructure/GestaoEmprestimos.Infrastructure.csproj" />
+  </Folder>
+</Solution>
