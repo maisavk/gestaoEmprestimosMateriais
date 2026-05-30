@@ -1,5 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <ItemGroup>
+    <ProjectReference Include="..\GestaoEmprestimos.Application\GestaoEmprestimos.Application.csproj" />
+    <ProjectReference Include="..\GestaoEmprestimos.Domain\GestaoEmprestimos.Domain.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
