@@ -1,0 +1,88 @@
+@page "/emprestimos"
+@using GestaoEmprestimos.Application
+@using GestaoEmprestimos.Domain.Entities
+@using GestaoEmprestimos.Domain.Enums
+@inject EmprestimoService Service
+@rendermode InteractiveServer
+
+<PageTitle>Realizar Empréstimo</PageTitle>
+
+<h1>Solicitar Empréstimo de Material</h1>
+
+<div class="card p-3 mb-4">
+    <h4>Nova Solicitação</h4>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Selecione o Material Didático:</label>
+            <select @bind="materialIdSelecionado" class="form-select">
+                <option value="0">-- Escolha um Material --</option>
+                @foreach (var m in Service.ListarMateriais())
+                {
+                    <option value="@m.Id">@m.Titulo (Disponível: @m.QuantidadeDisponivel)</option>
+                }
+            </select>
+        </div>
+        
+        <div class="col-md-3">
+            <label class="form-label">Prazo (Dias):</label>
+            <input type="number" @bind="diasPrazo" class="form-control" min="1" />
+        </div>
+
+        <div class="col-md-3 d-flex align-items-end">
+            <button class="btn btn-success w-100" @onclick="FinalizarEmprestimo">Confirmar Empréstimo</button>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(mensagemSucesso))
+{
+    <div class="alert alert-success">@mensagemSucesso</div>
+}
+
+@if (!string.IsNullOrEmpty(mensagemErro))
+{
+    <div class="alert alert-danger">?? @mensagemErro</div>
+}
+
+@code {
+    private int materialIdSelecionado = 0;
+    private int diasPrazo = 7;
+    private string mensagemSucesso = "";
+    private string mensagemErro = "";
+
+    // Criando dados de teste básicos na tela caso as listas estejam vazias
+    protected override void OnInitialized()
+    {
+        if (!Service.ListarEstudantes().Any())
+        {
+            Service.CadastrarEstudante(new Estudante(1, "Maisa Vendrame", "2026001"));
+            Service.CadastrarProfessor(new Professor(1, "Prof. Clodoaldo", "SIAPE123"));
+        }
+    }
+
+    private void FinalizarEmprestimo()
+    {
+        mensagemSucesso = "";
+        mensagemErro = "";
+
+        if (materialIdSelecionado == 0)
+        {
+            mensagemErro = "Por favor, selecione um material válido.";
+            return;
+        }
+
+        try
+        {
+            int proximoId = Guid.NewGuid().GetHashCode(); // Gera um ID temporário único
+            
+            // Executa a regra de negócio passando o material escolhido no Combobox
+            Service.RealizarEmprestimo(proximoId, 1, 1, materialIdSelecionado, diasPrazo);
+            
+            mensagemSucesso = "Empréstimo realizado com sucesso! O estoque foi atualizado.";
+        }
+        catch (Exception ex)
+        {
+            mensagemErro = ex.Message; // Captura a trava do PRD (estoque zerado, etc.)
+        }
+    }
+}
