@@ -1,29 +1,34 @@
-using GestaoEmprestimos.Domain.Enums;
+﻿using System;
 
-namespace GestaoEmprestimos.Domain.Entities
+namespace GestaoEmprestimos.Domain.Entities;
+
+public class Emprestimo
 {
-    public class Emprestimo
+    public Guid Id { get; private set; }
+    public Aluno Aluno { get; private set; }
+    public Produto Produto { get; private set; }
+    public DateTime DataEmprestimo { get; private set; }
+    public DateTime? DataDevolucao { get; private set; }
+
+    public Emprestimo(Aluno aluno, Produto produto)
     {
-        public int Id { get; private set; }
-        public Estudante Estudante { get; private set; }
-        public Professor ProfessorSolicitante { get; private set; }
-        public Material Material { get; private set; }
-        public DateTime DataRetirada { get; private set; }
-        public DateTime PrazoDevolucao { get; private set; }
-        public SituacaoEmprestimo Situacao { get; private set; }
+        Aluno = aluno ?? throw new ArgumentNullException(nameof(aluno), "O aluno não pode ser nulo.");
+        Produto = produto ?? throw new ArgumentNullException(nameof(produto), "O produto não pode ser nulo.");
 
-        public Emprestimo(int id, Estudante estudante, Professor professorSolicitante, Material material, int diasPrazo)
-        {
-            if (material.QuantidadeDisponivel <= 0)
-                throw new InvalidOperationException("Material indispon�vel para empr�stimo.");
+        if (!produto.Disponivel)
+            throw new InvalidOperationException("Não é possível emprestar um produto que já está ocupado.");
 
-            Id = id;
-            Estudante = estudante;
-            ProfessorSolicitante = professorSolicitante;
-            Material = material;
-            DataRetirada = DateTime.Now;
-            PrazoDevolucao = DateTime.Now.AddDays(diasPrazo);
-            Situacao = SituacaoEmprestimo.Solicitado;
-        }
+        Id = Guid.NewGuid();
+        DataEmprestimo = DateTime.Now;
+        Produto.AlterarDisponibilidade(false);
+    }
+
+    public void RegistrarDevolucao()
+    {
+        if (DataDevolucao.HasValue)
+            throw new InvalidOperationException("Este empréstimo já foi devolvido.");
+
+        DataDevolucao = DateTime.Now;
+        Produto.AlterarDisponibilidade(true);
     }
 }
