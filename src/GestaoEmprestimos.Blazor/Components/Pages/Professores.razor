@@ -1,0 +1,33 @@
+﻿@page "/professores"
+@rendermode InteractiveServer
+@inject GestaoEmprestimos.Application.EmprestimoService Service
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white py-3">
+            <h4 class="mb-0">Gerenciar Professores Solicitantes</h4>
+        </div>
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-5 border-end">
+                    <h5 class="text-primary mb-3">Novo Professor Solicitante</h5>
+                    <div class="mb-3"><label class="form-label fw-bold">Nome do Docente:</label><input @bind="nomeP" class="form-control form-control-lg" placeholder="Ex: Dr. Roberto Shmidt" /></div>
+                    <button class="btn btn-primary btn-lg w-100 mt-4 fw-bold" @onclick="AddP">Salvar Professor</button>
+                </div>
+                <div class="col-md-7 ps-4">
+                    <h5 class="text-muted mb-3">Corpo Docente Homologado</h5>
+                    <div class="list-group">
+                        @foreach(var p in Service.Professores){
+                            <div class="list-group-item">
+                                <i class="bi bi-person-check text-primary me-2"></i> @p
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@code { 
+    string nomeP = ""; 
+    void AddP() { if(!string.IsNullOrEmpty(nomeP)){ Service.CadastrarProfessor(nomeP); nomeP=""; } } 
+}

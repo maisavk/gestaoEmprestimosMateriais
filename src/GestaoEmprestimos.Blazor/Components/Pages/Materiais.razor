@@ -1,87 +1,54 @@
-@page "/materiais"
-@using GestaoEmprestimos.Application
-@using GestaoEmprestimos.Domain.Entities
-@using GestaoEmprestimos.Domain.Enums
-@inject EmprestimoService Service
+﻿@page "/materiais"
 @rendermode InteractiveServer
-
-<PageTitle>Materiais Adaptados</PageTitle>
-
-<h1>Gest�o de Materiais Did�ticos</h1>
-
-<div class="card p-3 mb-4">
-    <h4>Cadastrar Novo Material</h4>
-    <div class="row g-3">
-        <div class="col-md-4">
-            <input @bind="novoTitulo" class="form-control" placeholder="T�tulo do Material" />
+@inject GestaoEmprestimos.Application.EmprestimoService Service
+<div class="container mt-4">
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h4 class="mb-0">Materiais Didáticos Adaptados</h4>
         </div>
-        <div class="col-md-3">
-            <select @bind="tipoSelecionado" class="form-select">
-                @foreach (var tipo in Enum.GetValues<TipoMaterial>())
-                {
-                    <option value="@tipo">@tipo</option>
-                }
-            </select>
-        </div>
-        <div class="col-md-2">
-            <input type="number" @bind="novaQtd" class="form-control" placeholder="Qtd" />
-        </div>
-        <div class="col-md-3">
-            <button class="btn btn-primary w-100" @onclick="Adicionar">Registrar Material</button>
+        <div class="card-body p-4 bg-light">
+            <h5>Novo Material</h5>
+            <div class="row g-3">
+                <div class="col-md-4"><label class="form-label fw-bold">Título:</label><input @bind="t" class="form-control" placeholder="Ex: Quadro Magnético" /></div>
+                <div class="col-md-4"><label class="form-label fw-bold">Código:</label><input @bind="c" class="form-control" placeholder="Ex: 2312" /></div>
+                <div class="col-md-4"><label class="form-label fw-bold">Qtd Disponível:</label><input type="number" @bind="q" class="form-control" /></div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-12"><label class="form-label fw-bold">Descrição / Área de Conhecimento / Recursos de Acessibilidade:</label><input @bind="d" class="form-control" placeholder="Ex: Área: Matemática. Recursos: Alto-relevo" /></div>
+            </div>
+            <div class="text-end mt-3">
+                <button class="btn btn-primary btn-lg px-4 fw-bold" @onclick="Salvar">Cadastrar Material</button>
+            </div>
         </div>
     </div>
-</div>
-
-<div class="mb-3">
-    <input type="text" @bind="termoBusca" @bind:event="oninput" class="form-control" placeholder="?? Buscar material por t�tulo ou �rea..." />
-</div>
-
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>T�tulo</th>
-            <th>Tipo</th>
-            <th>Estoque</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var m in MateriaisFiltrados)
-        {
+    <table class="table table-hover text-center align-middle">
+        <thead class="table-dark">
             <tr>
-                <td>@m.Id</td>
-                <td>@m.Titulo</td>
-                <td>@m.Tipo</td>
-                <td>@m.QuantidadeDisponivel</td>
-                <td>
-                    <span class="badge @(m.QuantidadeDisponivel > 0 ? "bg-success" : "bg-danger")">
-                        @(m.QuantidadeDisponivel > 0 ? "Dispon�vel" : "Esgotado")
-                    </span>
-                </td>
+                <th>Código (ID)</th>
+                <th>Título</th>
+                <th>Especificações de Acessibilidade / Descrição</th>
+                <th>Qtd Estoque</th>
             </tr>
-        }
-    </tbody>
-</table>
-
-@code {
-    private string termoBusca = "";
-    private string novoTitulo = "";
-    private int novaQtd = 1;
-    private TipoMaterial tipoSelecionado = TipoMaterial.Braille;
-
-    private List<Material> MateriaisFiltrados => Service.ListarMateriais()
-        .Where(m => string.IsNullOrWhiteSpace(termoBusca) || 
-               m.Titulo.Contains(termoBusca, StringComparison.OrdinalIgnoreCase)).ToList();
-
-    private void Adicionar()
-    {
-        if (!string.IsNullOrWhiteSpace(novoTitulo))
-        {
-            int proxId = Service.ListarMateriais().Count + 1;
-            var material = new Material(proxId, novoTitulo, tipoSelecionado, "Cadastrado via Web", "Geral", "N/A", novaQtd);
-            Service.CadastrarMaterial(material);
-            novoTitulo = "";
-        }
-    }
+        </thead>
+        <tbody>
+            @foreach(var m in Service.Materiais){
+                <tr>
+                    <td>@m.Id</td>
+                    <td class="fw-bold">@m.Titulo</td>
+                    <td>@m.Descricao</td>
+                    <td><span class="badge bg-info px-3 py-2 text-white">@m.QuantidadeDisponivel</span></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@code { 
+    string t = ""; string c = ""; string d = ""; int q = 1; 
+    void Salvar() { 
+        if(!string.IsNullOrEmpty(t)) { 
+            Service.CadastrarMaterialCompleto(t, c, d, q); 
+            t=""; c=""; d=""; q=1; 
+            StateHasChanged();
+        } 
+    } 
 }

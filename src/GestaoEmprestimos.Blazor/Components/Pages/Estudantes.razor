@@ -1,0 +1,8 @@
+﻿@page "/estudantes"
+@inject GestaoEmprestimos.Application.EmprestimoService Service
+<h3>Gestao de Estudantes e Professores</h3>
+<div class="row"><div class="col-md-6"><h5>Cadastrar Estudante</h5><label>RA:</label><input @bind="ra" class="form-control" /><label>Nome:</label><input @bind="nomeA" class="form-control" /><button class="btn btn-success mt-2" @onclick="AddA">Salvar Aluno</button></div>
+<div class="col-md-6"><h5>Cadastrar Professor Solicitante</h5><label>Nome do Professor:</label><input @bind="nomeP" class="form-control" /><button class="btn btn-primary mt-4" @onclick="AddP">Salvar Professor</button></div></div>
+<div class="row mt-4"><div class="col-md-6"><h5>Estudantes</h5><ul>@foreach(var a in Service.Alunos){<li>@ObterIdentificador(a) - @a.Nome</li>}</ul></div>
+<div class="col-md-6"><h5>Professores</h5><ul>@foreach(var p in Service.Professores){<li>@p</li>}</ul></div></div>
+@code { string ra = ""; string nomeA = ""; string nomeP = ""; void AddA() { if(!string.IsNullOrEmpty(ra)){ Service.CadastrarEstudante(ra, nomeA); ra=""; nomeA=""; } } void AddP() { if(!string.IsNullOrEmpty(nomeP)){ Service.CadastrarProfessor(nomeP); nomeP=""; } } string ObterIdentificador(object obj) { if (obj == null) return ""; try { dynamic d = obj; return d.RA?.ToString() ?? d.Matricula?.ToString() ?? d.Codigo?.ToString() ?? d.Id?.ToString() ?? ""; } catch { return ""; } } }
