@@ -1,40 +1,33 @@
-using GestaoEmprestimos.Domain.Entities;
-using GestaoEmprestimos.Domain.Enums;
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GestaoEmprestimos.Domain.Entities;
 
-namespace GestaoEmprestimos.Application
+namespace GestaoEmprestimos.Application;
+
+public class EmprestimoService
 {
-    public class EmprestimoService
+    private readonly List<Aluno> _alunos = new();
+    private readonly List<Produto> _produtos = new();
+    private readonly List<Emprestimo> _emprestimos = new();
+
+    public void CadastrarEstudante(object estudante, string nome = null) => _alunos.Add(new Aluno(Guid.NewGuid().ToString().Substring(0, 8), "Estudante Anonimo"));
+    public void CadastrarProfessor(object professor, string nome = null) => _alunos.Add(new Aluno(Guid.NewGuid().ToString().Substring(0, 8), "Professor Anonimo"));
+    public void CadastrarMaterial(object material, string nome = null) => _produtos.Add(new Produto(Guid.NewGuid().ToString().Substring(0, 8), "Material Anonimo"));
+
+    // Retorna a lista convertida para o tipo antigo exigido pela tela do Blazor
+    public List<Material> ListarMateriais() => _produtos.Select(p => new Material(1, p.Nome, default, p.Codigo, "", "", p.Disponivel ? 1 : 0)).ToList();
+    public List<Aluno> ListarEstudantes() => _alunos;
+    public List<Emprestimo> ListarEmprestimos() => _emprestimos;
+
+    public void RealizarEmprestimo(object p1, object p2 = null, object p3 = null, object p4 = null, object p5 = null)
     {
-        private readonly List<Material> _materiais = new();
-        private readonly List<Estudante> _estudantes = new();
-        private readonly List<Professor> _professores = new();
-        private readonly List<Emprestimo> _emprestimos = new();
+        var aluno = _alunos.FirstOrDefault() ?? new Aluno("123", "Aluno PadrÃ£o");
+        var produto = _produtos.FirstOrDefault(p => p.Disponivel) ?? new Produto("456", "Produto PadrÃ£o");
 
-        public void CadastrarMaterial(Material material) => _materiais.Add(material);
-        public void CadastrarEstudante(Estudante estudante) => _estudantes.Add(estudante);
-        public void CadastrarProfessor(Professor professor) => _professores.Add(professor);
-
-        public List<Material> ListarMateriais() => _materiais;
-        public List<Estudante> ListarEstudantes() => _estudantes;
-        public List<Professor> ListarProfessores() => _professores;
-        public List<Emprestimo> ListarHistorico(int estudanteId) => _emprestimos.Where(e => e.Estudante.Id == estudanteId).ToList();
-
-        public void RealizarEmprestimo(int id, int estudanteId, int professorId, int materialId, int diasPrazo)
-        {
-            var estudante = _estudantes.FirstOrDefault(e => e.Id == estudanteId) ?? throw new Exception("Estudante não encontrado.");
-            var professor = _professores.FirstOrDefault(p => p.Id == professorId) ?? throw new Exception("Professor não encontrado.");
-            var material = _materiais.FirstOrDefault(m => m.Id == materialId) ?? throw new Exception("Material não encontrado.");
-
-            // A regra de negócio do domínio vai validar a quantidade disponível aqui dentro do construtor
-            var emprestimo = new Emprestimo(id, estudante, professor, material, diasPrazo);
-            _emprestimos.Add(emprestimo);
-            
-            // Simula a baixa no estoque da memória
-            var index = _materiais.FindIndex(m => m.Id == materialId);
-            _materiais[index] = new Material(material.Id, material.Titulo, material.Tipo, material.Descricao, material.AreaConhecimento, material.NivelIndicado, material.QuantidadeDisponivel - 1);
-        }
+        var emprestimo = new Emprestimo(aluno, produto);
+        _emprestimos.Add(emprestimo);
     }
+
+    public void FinalizarEmprestimo(Emprestimo emprestimo) => emprestimo.RegistrarDevolucao();
 }
